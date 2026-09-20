@@ -1,24 +1,32 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
+/// <summary>
+/// Sits on a pen's collider. When an animal of the matching species touches the
+/// pen it stops colliding with it (so it settles inside) and is reported safe.
+/// </summary>
 public class PenCollision : MonoBehaviour
 {
+    [Tooltip("Tag of the animal species this pen accepts.")]
     public string TagToIgnore = "";
-    
-    
 
-    void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == TagToIgnore)
+        if (!collision.gameObject.CompareTag(TagToIgnore))
         {
-            Physics2D.IgnoreCollision(collision.gameObject.GetComponent<Collider2D>(), GetComponent<Collider2D>());
-            // Debug.Log("Collidor works!");
-            int id = collision.gameObject.GetComponent<MovementSM>().id;
-            EventManager.onSafe(id);
+            return;
+        }
+
+        Collider2D animalCollider = collision.gameObject.GetComponent<Collider2D>();
+        Collider2D penCollider = GetComponent<Collider2D>();
+        if (animalCollider != null && penCollider != null)
+        {
+            Physics2D.IgnoreCollision(animalCollider, penCollider);
+        }
+
+        MovementSM movement = collision.gameObject.GetComponent<MovementSM>();
+        if (movement != null)
+        {
+            EventManager.RaiseSafe(movement.id);
         }
     }
 }
-
