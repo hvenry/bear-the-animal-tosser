@@ -1,21 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Buttons on the game-over screen.
+/// </summary>
 public class GameOverScreen : MonoBehaviour
 {
-    public void Setup(){
-         gameObject.SetActive(true);
+    public void Setup()
+    {
+        gameObject.SetActive(true);
     }
 
-    // button for restart
-    public void RestartButton(){
+    /// <summary>Back to level select to try again.</summary>
+    public void RestartButton()
+    {
         SceneManager.LoadScene("LevelSelect");
     }
 
-    public void ExitButton(){
+    /// <summary>Back to the main menu.</summary>
+    public void ExitButton()
+    {
         SceneManager.LoadScene("Main");
     }
 }
-

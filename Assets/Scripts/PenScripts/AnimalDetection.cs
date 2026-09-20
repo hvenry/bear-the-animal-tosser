@@ -1,22 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Reports how many animals of one species are currently inside this pen. Kept as
+/// a lightweight query helper for pen logic and debugging.
+/// </summary>
 public class AnimalDetection : MonoBehaviour
 {
+    [Tooltip("Tag of the animal species this pen accepts.")]
     public string Tag = "";
 
-    
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (GameObject.FindGameObjectsWithTag(Tag).Length > 2)
-            {
-                // Debug.Log("Debug logs Pen is full");
-            }
-
-        // EventManager.onSafe(2);
-
-    }
+    /// <summary>Number of animals of this pen's species currently in the level.</summary>
+    public int CountInLevel =>
+        string.IsNullOrEmpty(Tag) ? 0 : GameObject.FindGameObjectsWithTag(Tag).Length;
 }
