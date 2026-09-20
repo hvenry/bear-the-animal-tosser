@@ -81,8 +81,9 @@ run. Later levels spawn more animals and give you less time.
 
 ## Requirements
 
-- **Unity 2021.3.22f1** (LTS). Other 2021.3.x patch releases will almost certainly
-  work; major version jumps may prompt an API upgrade.
+- **Unity 6 (6000.6.2f1)** or newer. The project was originally built on Unity
+  2021.3.22f1 and migrated to Unity 6; opening it on the older version would
+  attempt a downgrade and is not supported.
 - No external dependencies beyond the Unity packages listed in
   `Packages/manifest.json` — they are restored automatically on first open.
 
@@ -116,16 +117,26 @@ cd bear-the-animal-tosser
 unityhub
 ```
 
-In Unity Hub: **Installs → Install Editor → Archive**, pick `2021.3.22f1`, then
-**Projects → Add** and select the cloned folder.
+In Unity Hub: **Installs → Install Editor**, pick **Unity 6 (6000.6.2f1 or
+newer)**, then **Projects → Add** and select the cloned folder.
 
-> If the editor window renders blank or the Hub will not launch under Wayland, start
-> it with `unityhub --no-sandbox`, or run under XWayland (`GDK_BACKEND=x11 unityhub`).
+> **Wayland:** if the Hub will not launch or renders blank, run it under XWayland
+> with `GDK_BACKEND=x11 unityhub`. If the Hub silently fails to start the editor,
+> launch it directly:
+>
+> ```bash
+> ~/Unity/Hub/Editor/<version>/Editor/Unity -projectPath ~/dev/bear-the-animal-tosser
+> ```
+>
+> **Older editors on current Arch:** Unity releases before Unity 6 link against
+> `libxml2.so.2`, while Arch now ships `libxml2.so.16`. They fail to start with
+> `error while loading shared libraries: libxml2.so.2`. Install the compatibility
+> package with `sudo pacman -S libxml2-legacy`. Unity 6 is unaffected.
 
 ### Windows
 
 1. Install [Unity Hub](https://unity.com/download).
-2. Install editor `2021.3.22f1` via **Installs → Install Editor → Archive**.
+2. Install **Unity 6 (6000.6.2f1 or newer)** via **Installs → Install Editor**.
 3. Clone the repo and add the folder through **Projects → Add**.
 
 ```powershell
@@ -139,21 +150,21 @@ brew install --cask unity-hub
 git clone https://github.com/hvenry/bear-the-animal-tosser.git
 ```
 
-Install editor `2021.3.22f1` through **Installs → Install Editor → Archive** (choose
-the Apple Silicon or Intel build to match your machine), then add the cloned folder
-via **Projects → Add**.
+Install **Unity 6 (6000.6.2f1 or newer)** through **Installs → Install Editor**
+(choose the Apple Silicon or Intel build to match your machine), then add the cloned
+folder via **Projects → Add**.
 
 ### Direct editor download
 
 If you would rather skip the Hub, the exact version is available here:
 
 ```
-https://unity.com/releases/editor/whats-new/2021.3.22
+https://unity.com/releases/editor/archive
 ```
 
 ## Running the game
 
-1. Open the project in Unity `2021.3.22f1`. The first import takes a few minutes
+1. Open the project in Unity 6. The first import takes a few minutes
    while the `Library/` cache is built — this is expected and only happens once.
 2. Open `Assets/Scenes/Main.unity` (the main menu).
 3. Press **Play**, then use the menu to reach level select.

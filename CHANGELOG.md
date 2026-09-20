@@ -1,5 +1,14 @@
 # Changelog
 
+## Unity 6 migration — 2026-09-20
+
+- Upgraded the project from Unity 2021.3.22f1 to Unity 6 (6000.6.2f1). Packages were
+  resolved to their Unity 6 versions; `com.unity.textmeshpro` is now folded into
+  `com.unity.ugui`.
+- Verified after migration: the project compiles with no errors, the Console is
+  clean, and all three levels play correctly.
+- Ignored the `.slnx` solution file Unity 6 generates.
+
 ## Cleanup pass — 2026-09-20
 
 This repository is a cleaned-up extraction of the original CISC 226 coursework repo.
