@@ -239,6 +239,14 @@ colliding (so it settles inside) and raises `EventManager.onSafe` with that anim
 id. `winCondition` assigned those ids at level start and counts each one only once;
 when the count reaches the total, the win scene loads.
 
+## License
+
+Released under the [MIT License](LICENSE), © 2023 the three contributors above.
+
+This covers the game's own code and assets. The vendored third-party code under
+`Assets/SuperTiled2Unity/` is governed by its own terms — see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 ## Credits
 
 - Code, art, design and audio by the three contributors listed above.
