@@ -1,0 +1,18 @@
+# Unity text-serialized assets: merge with Unity's YAML merge tool, never CRLF-mangle.
+*.unity      -text merge=unityyamlmerge diff
+*.prefab     -text merge=unityyamlmerge diff
+*.asset      -text merge=unityyamlmerge diff
+*.mat        -text merge=unityyamlmerge diff
+*.anim       -text merge=unityyamlmerge diff
+*.controller -text merge=unityyamlmerge diff
+*.meta       -text merge=unityyamlmerge diff
+
+# Source
+*.cs text diff=csharp
+
+# Binary assets
+*.png  binary
+*.jpg  binary
+*.mp3  binary
+*.wav  binary
+*.ttf  binary
