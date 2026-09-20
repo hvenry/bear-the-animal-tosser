@@ -10,8 +10,7 @@ ScriptedImporter:
   script: {fileID: 11500000, guid: cc34d0f3dc257a442819830b408c5322, type: 3}
   missingFiles: []
   errors:
-  - Texture was imported at a smaller size. Make sure 'Max Size' on 'blockPack_tilesheet@2.png'
-    is at least '2560'
+  - Texture was imported at a smaller size. Make sure 'Max Size' on 'blockPack_tilesheet@2.png' is at least '2560'
   warnings: []
   missingSortingLayers: []
   missingLayers: []
