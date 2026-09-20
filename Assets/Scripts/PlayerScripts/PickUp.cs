@@ -1,141 +1,171 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-
+/// <summary>
+/// Lets the bear carry a stack of animals and throw them. Right click picks up the
+/// nearest animal in range, left click throws the bottom of the stack along an arc
+/// toward the cursor.
+///
+/// Stacking rule: an animal can only be added if it is no heavier than everything
+/// already carried, so the bear cannot balance a cow on top of a chicken.
+/// </summary>
 public class PickUp : MonoBehaviour
 {
-   public Transform holdSpot;
-   public Transform holdSpot2;
-   public Transform holdSpot3;
-   public Transform holdSpot4;
-   private Transform[] spots = new Transform[4];
-   public GameObject animalPrefab;
-  
-   public LayerMask pickUpMask;
-   public GameObject destroyEffect;
-   public Vector3 Direction { get; set; }
-   private GameObject[] holdings = new GameObject[4];
-   private AudioSource audioSource;
-   public AudioClip throwingAudioClip;
-   public AudioClip pickUpAudioClip;
-   public AudioClip errorAudio;
-       
+    [Header("Carry slots, bottom of the stack first")]
+    public Transform holdSpot;
+    public Transform holdSpot2;
+    public Transform holdSpot3;
+    public Transform holdSpot4;
 
-   void Start()
-   {
-       spots = new Transform[] { holdSpot, holdSpot2, holdSpot3, holdSpot4 };
-       audioSource = GetComponent<AudioSource>();
-   }
-   void Update()
-   {
-       // for (int i = 0; i < holdings.Length; i++)
-       // {
-       //     GameObject item = holdings[i];
-       //     if (item)
-       //     {
-       //         item.transform.position = spots[i].position;
-       //     }
-       //
-       
-       if (Input.GetKeyDown(KeyCode.Mouse1))
-       {
-           Collider2D pickUpItem = Physics2D.OverlapCircle(transform.position , 2f, pickUpMask);
-           
-           if (pickUpItem)
-           {
-               bool allowed = true;
-               for (int i = 0; i < holdings.Length; i++)
-               {
-                   if (holdings[i] is not null && 
-                       holdings[i].GetComponent<MovementSM>().weight < pickUpItem.GetComponent<MovementSM>().weight)
-                       allowed = false;
+    [Header("Pick up")]
+    [Tooltip("Radius around the bear searched for an animal to pick up.")]
+    public float pickUpRadius = 2f;
 
-               }
+    [Tooltip("Layers that count as pickable animals.")]
+    public LayerMask pickUpMask;
 
-               if (allowed)
-               {
-                   for (int i = 0; i < holdings.Length; i++)
-                   {
-                       GameObject item = holdings[i];
-                       if (item)
-                           continue;
-                       GameObject temp = pickUpItem.gameObject;
-                       temp.transform.position = spots[i].position;
-                       temp.transform.parent = transform;
-                       MovementSM script = temp.GetComponent<MovementSM>();
-                       script.ChangeState(script.heldState);
-                       temp.GetComponent<Rigidbody2D>().simulated = false;
-                       holdings[i] = temp;
-                       audioSource.PlayOneShot(pickUpAudioClip);
-                       break;
+    [Header("Audio")]
+    public AudioClip pickUpAudioClip;
+    public AudioClip throwingAudioClip;
+    public AudioClip errorAudio;
 
+    private Transform[] _spots;
+    private GameObject[] _holdings;
+    private AudioSource _audioSource;
 
-                   }
-               }
-               else
-               {
-                   //play sound 
-                   audioSource.PlayOneShot(errorAudio);
-               }
-           }
-          
-       }
-       
-       if (Input.GetKeyDown(KeyCode.Mouse0))
-       {
-           if (holdings[0])
-           {
-               GameObject first = holdings[0];
-               MovementSM script = first.GetComponent<MovementSM>();
-               script.ChangeState(script.thrownState);
-               first.GetComponent<Rigidbody2D>().simulated = true;
-               
-               audioSource.PlayOneShot(throwingAudioClip);
-               holdings[0] = holdings[1];
-               
-               if (holdings[0] is not null)
-               {
-                   holdings[0].transform.position = spots[0].position;
-               }
-               
-               holdings[1] = holdings[2];
-               
-               if (holdings[1] is not null)
-               {
-                   holdings[1].transform.position = spots[1].position;
-               }
-               
-               holdings[2] = holdings[3];
-               
-               if (holdings[2] is not null)
-               {
-                   holdings[2].transform.position = spots[2].position;
-               }
-               holdings[3] = null;
-               
-           }
-       }
-   }
+    private void Start()
+    {
+        _spots = new[] { holdSpot, holdSpot2, holdSpot3, holdSpot4 };
+        _holdings = new GameObject[_spots.Length];
+        _audioSource = GetComponent<AudioSource>();
+    }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            TryPickUp();
+        }
 
-   // deprecated
-   IEnumerator ThrowItem(GameObject item)
-   {
-       Vector3 startPoint = item.transform.position;
-       Vector3 endPoint = transform.position + Direction * 2;
-       item.transform.parent = null;
-       for (int i = 0; i < 25; i++)
-       {
-           item.transform.position = Vector3.Lerp(startPoint, endPoint, i * .04f);
-           yield return null;
-       }
-       if (item.GetComponent<Rigidbody2D>())
-           item.GetComponent<Rigidbody2D>().simulated = true;
-       Instantiate(destroyEffect, item.transform.position, Quaternion.identity);
-       Destroy(item);
-   }
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            TryThrow();
+        }
+    }
 
+    private void TryPickUp()
+    {
+        Collider2D candidate = Physics2D.OverlapCircle(transform.position, pickUpRadius, pickUpMask);
+        if (candidate == null)
+        {
+            return;
+        }
 
+        MovementSM animal = candidate.GetComponent<MovementSM>();
+        if (animal == null)
+        {
+            return;
+        }
+
+        int slot = FirstFreeSlot();
+        if (slot < 0 || !CanStack(animal))
+        {
+            PlayClip(errorAudio);
+            return;
+        }
+
+        GameObject picked = candidate.gameObject;
+        picked.transform.position = _spots[slot].position;
+        picked.transform.parent = transform;
+        picked.GetComponent<Rigidbody2D>().simulated = false;
+        animal.ChangeState(animal.heldState);
+
+        _holdings[slot] = picked;
+        PlayClip(pickUpAudioClip);
+    }
+
+    private void TryThrow()
+    {
+        GameObject thrown = _holdings[0];
+        if (thrown == null)
+        {
+            return;
+        }
+
+        MovementSM animal = thrown.GetComponent<MovementSM>();
+        thrown.transform.parent = null;
+        thrown.GetComponent<Rigidbody2D>().simulated = true;
+        animal.ChangeState(animal.thrownState);
+
+        PlayClip(throwingAudioClip);
+        ShuffleStackDown();
+    }
+
+    /// <summary>
+    /// Moves every carried animal down one slot after a throw, so the stack stays
+    /// packed from the bottom and each animal sits on its new hold spot.
+    /// </summary>
+    private void ShuffleStackDown()
+    {
+        for (int i = 0; i < _holdings.Length - 1; i++)
+        {
+            _holdings[i] = _holdings[i + 1];
+            if (_holdings[i] != null)
+            {
+                _holdings[i].transform.position = _spots[i].position;
+            }
+        }
+
+        _holdings[_holdings.Length - 1] = null;
+    }
+
+    private int FirstFreeSlot()
+    {
+        for (int i = 0; i < _holdings.Length; i++)
+        {
+            if (_holdings[i] == null)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// True when <paramref name="candidate"/> is no heavier than every animal
+    /// already being carried.
+    /// </summary>
+    private bool CanStack(MovementSM candidate)
+    {
+        foreach (GameObject held in _holdings)
+        {
+            if (held == null)
+            {
+                continue;
+            }
+
+            MovementSM carried = held.GetComponent<MovementSM>();
+            if (carried != null && carried.weight < candidate.weight)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void PlayClip(AudioClip clip)
+    {
+        if (_audioSource != null && clip != null)
+        {
+            _audioSource.PlayOneShot(clip);
+        }
+    }
+
+    // Shows the pick-up radius in the editor.
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, pickUpRadius);
+    }
 }
