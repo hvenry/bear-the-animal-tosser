@@ -1,12 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+/// <summary>
+/// Base class for every state an animal can be in. The owning
+/// <see cref="StateMachine"/> calls these hooks; states override what they need.
+/// </summary>
 public class BaseState
 {
     public string name;
-    
-    // reference to the statemachine using this object 
+
+    // The state machine that owns this state instance.
     protected StateMachine stateMachine;
 
     public BaseState(string name, StateMachine stateMachine)
