@@ -1541,11 +1541,9 @@ MonoBehaviour:
   holdSpot2: {fileID: 360418691}
   holdSpot3: {fileID: 1937910650}
   holdSpot4: {fileID: 1876297016}
-  animalPrefab: {fileID: 4527659064612919112, guid: 05f78a18ee34261478b094793e8ae35a, type: 3}
   pickUpMask:
     serializedVersion: 2
     m_Bits: 8
-  destroyEffect: {fileID: 0}
   throwingAudioClip: {fileID: 8300000, guid: 8fca86a9f852f3045a6944e2b9716e3e, type: 3}
   pickUpAudioClip: {fileID: 8300000, guid: 9d49b4130c20bd5459e07621e99e15da, type: 3}
   errorAudio: {fileID: 8300000, guid: 0964884fc58eb484885a5d145611ddb9, type: 3}
@@ -1578,8 +1576,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 7.5
   rb: {fileID: 673579570}
-  prefab: {fileID: 4527659064612919112, guid: 05f78a18ee34261478b094793e8ae35a, type: 3}
-  pickUp: {fileID: 0}
   animator: {fileID: 673579565}
 --- !u!50 &673579570
 Rigidbody2D:

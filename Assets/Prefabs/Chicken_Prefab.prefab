@@ -151,6 +151,5 @@ MonoBehaviour:
   collider2D: {fileID: 0}
   id: 0
   speed: 50
-  timer: {fileID: 0}
   roamTimer: 2
   weight: 1
