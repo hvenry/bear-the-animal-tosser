@@ -1,143 +1,128 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 
+/// <summary>
+/// Drives the win/loss rules for a level: tracks how many loose animals have been
+/// penned, counts down the level timer, and draws the on-screen HUD.
+/// </summary>
 public class winCondition : MonoBehaviour
 {
-    private GameObject[] loose = Array.Empty<GameObject>();
+    // Tags of every animal species that counts toward the level goal.
+    private static readonly string[] AnimalTags = { "Cow", "Pig", "Hog", "Chicken" };
 
-    private GameObject[] safe;
-
-    
-
-    private int total = 0;
-
-    private int safeLength = 0;
+    // Animals are spawned by Spawner during its own Start(), so the roster is
+    // gathered one frame later rather than racing it.
+    private const float RosterScanDelay = 1f;
 
     [SerializeField] public float totalTime;
-    private float timeRemaining;
     public AudioSource success;
 
-    [SerializeField] public Slider timeSlider;
+    private readonly List<GameObject> _loose = new List<GameObject>();
+    private bool[] _isSafe = Array.Empty<bool>();
 
-    [SerializeField] public Slider progressSlider;
-    // Start is called before the first frame update
-    void Start()
+    private int _total;
+    private int _safeCount;
+    private float _timeRemaining;
+
+    // Cached so OnGUI does not allocate a new GUIStyle every frame.
+    private GUIStyle _hudStyle;
+
+    private void Start()
     {
-        // Debug.Log("Win Condition start");
-       Invoke("DelayedStart",1);
-       success = GetComponent<AudioSource>();
-       
-       timeRemaining = totalTime;
-       // timeSlider.highValue = totalTime;
-       // timeSlider.lowValue = 0;
-       // timeSlider.value = timeRemaining;
-
-
+        success = GetComponent<AudioSource>();
+        _timeRemaining = totalTime;
+        Invoke(nameof(CollectAnimals), RosterScanDelay);
     }
 
-    void Switch(int id)
+    private void OnDestroy()
     {
-        Debug.Log(String.Format("OnSafe called id: {0}",id));
-        
-        safe[id] = loose[id];
-        safeLength++;
-        success.Play();
-        Debug.Log(String.Format("Length of loose: {0}, safe: {1}. total: {2}",loose.Length, safeLength,total));
-        
+        // Without this the delegate keeps a dead instance alive across scene loads
+        // and Switch() fires on a destroyed object.
+        EventManager.onSafe -= Switch;
     }
-    
-    // Update is called once per frame
-    void Update()
+
+    /// <summary>
+    /// Builds the roster of loose animals and hands each one the index it reports
+    /// back through <see cref="EventManager.onSafe"/> when it reaches a pen.
+    /// </summary>
+    private void CollectAnimals()
     {
-        timeRemaining -= Time.deltaTime;
-        // timeSlider.value = timeRemaining;
-        // float percentage = total / safeLength * 100;
-        // progressSlider.value = percentage;
-        
-        
-        if (Won() && total != 0)
+        foreach (string tag in AnimalTags)
         {
-            // success.Play();
-            SceneManager.LoadScene("Win");
-            Debug.Log("WON GAME");
-            //Trigger end game (WIN)
+            _loose.AddRange(GameObject.FindGameObjectsWithTag(tag));
         }
 
-        if (Lost())
+        _total = _loose.Count;
+        _isSafe = new bool[_total];
+
+        for (int i = 0; i < _total; i++)
+        {
+            MovementSM movement = _loose[i].GetComponent<MovementSM>();
+            if (movement != null)
+            {
+                movement.id = i;
+            }
+        }
+
+        EventManager.onSafe += Switch;
+    }
+
+    /// <summary>
+    /// Marks one animal as penned. Guards against an animal scoring twice, which
+    /// would otherwise let the level be won with animals still loose.
+    /// </summary>
+    private void Switch(int id)
+    {
+        if (id < 0 || id >= _isSafe.Length || _isSafe[id])
+        {
+            return;
+        }
+
+        _isSafe[id] = true;
+        _safeCount++;
+
+        if (success != null)
+        {
+            success.Play();
+        }
+    }
+
+    private void Update()
+    {
+        _timeRemaining -= Time.deltaTime;
+
+        if (Won())
+        {
+            SceneManager.LoadScene("Win");
+        }
+        else if (Lost())
         {
             SceneManager.LoadScene("GameOver");
-            Debug.Log("You lose!");
-            //end game (LOSS)
         }
-    }
-
-    private void DelayedStart()
-    {
-        loose = loose.Concat(GameObject.FindGameObjectsWithTag("Cow")).ToArray();
-        loose = loose.Concat(GameObject.FindGameObjectsWithTag("Pig")).ToArray();
-        loose = loose.Concat(GameObject.FindGameObjectsWithTag("Hog")).ToArray();
-        loose = loose.Concat(GameObject.FindGameObjectsWithTag("Chicken")).ToArray();
-        total = loose.Length;
-        Debug.Log(String.Format("Length of loose: {0}, Loose[0] is type of: {1}", total, loose[0].GetType()));
-        EventManager.onSafe += Switch;
-        Debug.Log(String.Format("Loose: {0}", loose));
-        for (int i = 0; i < loose.Length; i++)
-        {
-            Debug.Log(String.Format("ID: {0}, Object: {1}", i, loose[i]));
-            MovementSM x = loose[i].GetComponent<MovementSM>();
-            // Debug.Log(String.Format("MovementSM: {0}, Speed: {1}", x, x.speed));
-            loose[i].GetComponent<MovementSM>().id = i;
-        }
-
-        safe = new GameObject[loose.Length];
     }
 
     private void OnGUI()
     {
-        // Calculate the time remaining as an integer number of minutes and seconds
-        int minutes = Mathf.FloorToInt(timeRemaining / 60);
-        int seconds = Mathf.FloorToInt(timeRemaining % 60);
+        // Clamped so the HUD never shows a negative clock on the frame the level ends.
+        float shown = Mathf.Max(0f, _timeRemaining);
+        int minutes = Mathf.FloorToInt(shown / 60f);
+        int seconds = Mathf.FloorToInt(shown % 60f);
 
-        // Create a string to display the time remaining in minutes and seconds
-        string timeRemainingString = string.Format("<color=white>TIME: {0:00}:{1:00}</color>", minutes, seconds);
+        string timeText = string.Format("<color=white>TIME: {0:00}:{1:00}</color>", minutes, seconds);
+        string progressText = string.Format("<color=white>ANIMALS WRANGLED: {0}/{1}</color>", _safeCount, _total);
 
-        string progress = string.Format("<color=white>ANIMALS WRANGLED: {0}/{1}</color>", safeLength, total);
+        _hudStyle ??= new GUIStyle { fontSize = 24, richText = true };
 
-        // change font of GUI
-        GUIStyle style = new GUIStyle();
-        
-        style.fontSize = 24;
-
-        // Measure the width of the label based on the text and style
-        Vector2 size = style.CalcSize(new GUIContent(timeRemainingString));
-        Vector2 progressSize = style.CalcSize(new GUIContent(progress));
-
-
-        // Set the position and size of the label
-        Rect labelRect = new Rect((Screen.width - size.x) / 2, 30, size.x, 40);
-        Rect progressRect = new Rect(20, Screen.height - 50, 250, 40);
-
-        
-        // Display the label
-        GUI.Label(labelRect, timeRemainingString, style);
-        GUI.Label(progressRect, progress, style);
+        Vector2 size = _hudStyle.CalcSize(new GUIContent(timeText));
+        GUI.Label(new Rect((Screen.width - size.x) / 2f, 30f, size.x, 40f), timeText, _hudStyle);
+        GUI.Label(new Rect(20f, Screen.height - 50f, 250f, 40f), progressText, _hudStyle);
     }
 
-    bool Won()
-    {
-        return (loose.Length == safeLength);
-    }
+    // _total > 0 keeps the level from being "won" during the frames before the
+    // roster has been collected.
+    private bool Won() => _total > 0 && _safeCount >= _total;
 
-    bool Lost()
-    {
-        return timeRemaining <= 0;
-    }
-
+    private bool Lost() => _timeRemaining <= 0f;
 }
