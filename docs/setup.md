@@ -12,6 +12,7 @@ Install it, or anything newer, through Unity Hub (**Installs > Install Editor**)
 The editor archive is at https://unity.com/releases/editor/archive if you skip the Hub.
 
 **Per platform**
+
 - macOS: `brew install --cask unity-hub`; pick the Apple Silicon or Intel editor to match the machine.
 - Windows: install [Unity Hub](https://unity.com/download).
 - Arch Linux: `yay -S unityhub` (AUR), or `git clone https://aur.archlinux.org/unityhub.git && cd unityhub && makepkg -si`.
@@ -28,15 +29,18 @@ WebGL is what itch.io hosts; desktop standalone builds also work.
 Headless commands are in `AGENTS.md`.
 
 ## Tech
+
 - Unity Hub and the Unity editor.
 - Unity Package Manager for `Packages/manifest.json`.
 
 ## Key files
+
 - `ProjectSettings/ProjectVersion.txt` - required editor version
 - `Packages/manifest.json` - Unity package dependencies
 - `ProjectSettings/EditorBuildSettings.asset` - scenes included in builds, in order
 
 ## Decisions and gotchas
+
 - The project was built on Unity 2021.3 and migrated to Unity 6 (see `CHANGELOG.md`); there is no supported path back.
 - Wayland: if the Hub will not launch or renders blank, run `GDK_BACKEND=x11 unityhub`.
   If the Hub silently fails to start the editor, run it directly: `~/Unity/Hub/Editor/<version>/Editor/Unity -projectPath <repo>`.
@@ -45,5 +49,6 @@ Headless commands are in `AGENTS.md`.
 - `MainMenu.QuitGame` does nothing in the editor or a WebGL build.
 
 ## Related
+
 - [Level flow](level-flow.md)
 - [Gameplay](gameplay.md)

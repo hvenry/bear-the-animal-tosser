@@ -36,6 +36,7 @@ Per-species tuning (`speed`, `weight`, `roamTimer`) is serialized on each prefab
 `fleeThreshold` uses the script default.
 
 ## Key files
+
 - `Assets/Scripts/GUIScripts/StateMachine.cs` - generic state machine and `timeSpent` clock
 - `Assets/Scripts/AnimalScripts/BaseState.cs` - state hook interface
 - `Assets/Scripts/AnimalScripts/AnimalBaseState.cs` - shared player-distance and movement helpers
@@ -43,6 +44,7 @@ Per-species tuning (`speed`, `weight`, `roamTimer`) is serialized on each prefab
 - `Assets/Scripts/AnimalScripts/{Idle,Roaming,Fleeing,Held,Thrown}.cs` - the states
 
 ## Decisions and gotchas
+
 - The player is found once per animal in `MovementSM.Awake` by the `Player` tag; every state reads that cache instead of calling `FindWithTag` per frame.
   An animal spawned before the player exists never finds it and will not flee.
 - `fleeThreshold` is a **squared** distance (default 25, i.e. 5 units), compared against `sqrMagnitude` to avoid a square root per animal per frame.
@@ -52,5 +54,6 @@ Per-species tuning (`speed`, `weight`, `roamTimer`) is serialized on each prefab
 - Movement uses `Rigidbody2D.MovePosition` in `UpdateLogic` (i.e. `Update`), not `FixedUpdate`; preserved from the original to keep the feel unchanged.
 
 ## Related
+
 - [Carry and throw](carry-and-throw.md)
 - [Level flow](level-flow.md)

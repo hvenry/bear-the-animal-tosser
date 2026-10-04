@@ -7,6 +7,7 @@ Win and loss depend on every loose animal being counted exactly once and on a ti
 A miscount wins a level with animals still loose, and a stale event handler fires on destroyed objects after a scene change.
 
 ## How it works
+
 ```mermaid
 sequenceDiagram
     participant S as Spawner (x4 per level)
@@ -40,10 +41,12 @@ sequenceDiagram
 `MainMenu` and `GameOverScreen` load scenes by name; the build scene list is in `ProjectSettings/EditorBuildSettings.asset`.
 
 ## Tech
+
 - Unity `SceneManager`, built-in 2D physics collisions, IMGUI (`OnGUI`) for the HUD.
 - Maps authored in Tiled (`Assets/SuperTiled2Unity/Imports/*.tmx`) and imported by SuperTiled2Unity.
 
 ## Key files
+
 - `Assets/Scripts/PlayerScripts/Spawner.cs` - per-zone random spawning
 - `Assets/winCondition.cs` - roster, scoring, timer, HUD, win/loss scene loads
 - `Assets/EventManager.cs` - static `onSafe` channel and null-safe `RaiseSafe`
@@ -52,6 +55,7 @@ sequenceDiagram
 - `Assets/Scripts/GUIScripts/MainMenu.cs`, `Assets/GameOverScreen.cs` - scene navigation buttons
 
 ## Decisions and gotchas
+
 - `totalTime`, `lower` and `upper` are serialized per scene, not in code; edit them in the level scene.
 - `Won()` requires `_total > 0`, so a level cannot be won in the first second before the roster exists.
   A level whose spawners produce zero animals can never be won.
@@ -61,5 +65,6 @@ sequenceDiagram
 - `winCondition` and `GameOverScreen` sit at the `Assets/` root rather than under `Scripts/`; moving them is safe only inside the editor so the `.meta` GUID follows.
 
 ## Related
+
 - [Animal AI](animal-ai.md)
 - [Carry and throw](carry-and-throw.md)

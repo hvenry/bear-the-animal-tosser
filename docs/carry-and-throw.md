@@ -11,6 +11,7 @@ Throwing on a fixed arc, instead of physics, makes the landing spot exactly wher
 It also feeds `Horizontal`, `Vertical` and `Speed` to the bear's animator (`Assets/Animation/Player.controller`).
 
 **Pickup (right click).** `PickUp.TryPickUp`:
+
 1. `Physics2D.OverlapCircle` around the bear on the `PickUp` layer mask.
 2. Rejects with the error sound if all four slots are full or `CanStack` fails.
 3. Parents the animal to the bear, snaps it to the first free hold spot, disables its rigidbody simulation, and moves it to `Held`.
@@ -24,6 +25,7 @@ Weights: chicken 1, hog 2, pig 3, cow 4 (set on the prefabs).
 **Flight.** `Thrown.Enter` records the bear's position and the cursor's world position; `UpdateLogic` evaluates `MathParabola.Parabola` over a fixed 2s with a 2-unit arc height, then snaps to the landing point and returns to Idle.
 
 ## Key files
+
 - `Assets/Scripts/PlayerScripts/PlayerMovement.cs` - input, velocity, animator parameters
 - `Assets/Scripts/PlayerScripts/PickUp.cs` - carry slots, stacking rule, pickup and throw
 - `Assets/Scripts/PlayerScripts/MathParabola.cs` - arc evaluation
@@ -31,6 +33,7 @@ Weights: chicken 1, hog 2, pig 3, cow 4 (set on the prefabs).
 - `Assets/Scripts/AnimalScripts/Thrown.cs` - flight state
 
 ## Decisions and gotchas
+
 - The four hold spots are separate serialized `Transform` fields (`holdSpot`..`holdSpot4`), not an array, so existing scene wiring survives; `Start` packs them into `_spots`.
 - The thrown animal is always the bottom one, so after a throw the next-heaviest becomes the bottom; the weight rule still holds.
 - `OverlapCircle` returns an arbitrary overlapping collider, not strictly the nearest.
@@ -40,5 +43,6 @@ Weights: chicken 1, hog 2, pig 3, cow 4 (set on the prefabs).
 - `Rigidbody2D.velocity` is obsolete in current Unity (`linearVelocity` replaces it); it still compiles with a warning.
 
 ## Related
+
 - [Animal AI](animal-ai.md)
 - [Level flow](level-flow.md)

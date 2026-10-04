@@ -46,15 +46,18 @@ Landing it in the matching pen counts it as wrangled.
 Each level scatters animals across four spawn zones, so the herd differs every run; later levels spawn more animals with less time.
 
 ## Key files
+
 - `Assets/Prefabs/*_Prefab.prefab` - per-species weight and speed
 - `Assets/Scenes/Levels/*.unity` - per-level timer and spawn counts
 - `Assets/Scripts/PlayerScripts/PickUp.cs` - controls and stacking rule
 
 ## Decisions and gotchas
+
 - Tuning lives in serialized prefab and scene values, not code; a diff to a `.prefab` or `.unity` file can be a gameplay change.
 - Throws use a fixed arc rather than physics so the landing spot is exact, which makes pen shots fair.
 
 ## Related
+
 - [Carry and throw](carry-and-throw.md)
 - [Level flow](level-flow.md)
 - [Animal AI](animal-ai.md)
