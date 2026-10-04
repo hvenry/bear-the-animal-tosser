@@ -1,5 +1,12 @@
 # Changelog
 
+## Agent docs - 2026-10-03
+
+- Added `AGENTS.md` (with `CLAUDE.md` importing it) as the contributor and agent guide.
+- Added concept docs under `docs/`: setup, gameplay, animal AI, carry and throw, level flow.
+- Rewrote `README.md` as a short front page; setup, gameplay and architecture detail moved into those docs.
+- Added `docs/specs/test-suite.md`, the plan for the missing automated tests.
+
 ## Unity 6 migration — 2026-09-20
 
 - Upgraded the project from Unity 2021.3.22f1 to Unity 6 (6000.6.2f1). Packages were
